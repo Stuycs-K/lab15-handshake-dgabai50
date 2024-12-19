@@ -11,6 +11,8 @@
   =========================*/
 int server_setup() {
   int from_client = 0;
+  mkfifo("wkp", 0666);
+  from_client = open("wkp", O_WRONLY);
   return from_client;
 }
 
@@ -25,6 +27,12 @@ int server_setup() {
   =========================*/
 int server_handshake(int *to_client) {
   int from_client;
+  char buffer[100];
+  read(*to_client, buffer, sizeof(buffer));
+  from_client = open(buffer, O_WRONLY);
+  int *rec;
+  *rec = 4;
+  write(from_client, rec, sizeof(rec));
   return from_client;
 }
 
