@@ -1,10 +1,19 @@
 #include "pipe_networking.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 //UPSTREAM = to the server / from the client
 //DOWNSTREAM = to the client / from the server
+
 /*=========================
   server_setup
 
-  creates the WKP and opens it, waiting for a  connection.
+  creates the WKP and opens it, waiting for a connection.
   removes the WKP once a connection has been made
 
   returns the file descriptor for the upstream pipe.
@@ -12,7 +21,7 @@
 int server_setup() {
   int from_client = 0;
   mkfifo("wkp", 0666);
-  from_client = open("wkp", O_WRONLY);
+  from_client = open("wkp", O_RDONLY);
   return from_client;
 }
 
@@ -41,7 +50,7 @@ int server_handshake(int *to_client) {
   *to_client = open(clientPipe, O_WRONLY);
 
   int syn_ack = 1123;
-  if (write(*to_client, syn_ack, sizeof(syn_ack)) == -1) {
+  if (write(*to_client, &syn_ack, sizeof(syn_ack)) == -1) {
     printf("SYN_ACK SEND FAIL\n");
     exit(1);
   } else {
@@ -64,7 +73,6 @@ int server_handshake(int *to_client) {
   return from_client;
 }
 
-
 /*=========================
   client_handshake
   args: int * to_server
@@ -76,53 +84,39 @@ int server_handshake(int *to_client) {
   =========================*/
 int client_handshake(int *to_server) {
   int from_server;
-  
+
   char pidPipe[100];
   int pid = getpid();
-  sprintf(pidPipe, "%d",pid);
+  sprintf(pidPipe, "%d", pid);
   mkfifo(pidPipe, 0666);
 
   from_server = open("wkp", O_WRONLY);
-  if (write(from_server, pid, sizeof(pid)) == -1) {
+  if (write(from_server, pidPipe, sizeof(pidPipe)) == -1) {
     printf("SYN SEND FAIL\n");
     exit(1);
   } else {
     printf("[SYN SENT]: %d\n", pid);
   }
 
-  int syn_ack;
   *to_server = open(pidPipe, O_RDONLY);
-  if (read(*to_server, syn_ack, sizeof(syn_ack)) == -1) {
+  int syn_ack;
+  if (read(*to_server, &syn_ack, sizeof(syn_ack)) == -1) {
     printf("SYN_ACK READ FAIL\n");
+    remove(pidPipe);
     exit(1);
   } else {
     printf("[SYN_ACK READ]: %d\n", syn_ack);
+    remove(pidPipe);
   }
 
-
   int ack = syn_ack + 1;
-  if (write(from_server, ack, sizeof(ack)) == -1) {
+  if (write(from_server, &ack, sizeof(ack)) == -1) {
     printf("ACK SEND FAIL\n");
     exit(1);
   } else {
-    printf("[ACK SENT]: %d", ack);
+    printf("[ACK SENT]: %d\n", ack);
   }
 
+  
   return from_server;
 }
-
-
-/*=========================
-  server_connect
-  args: int from_client
-
-  handles the subserver portion of the 3 way handshake
-
-  returns the file descriptor for the downstream pipe.
-  =========================*/
-int server_connect(int from_client) {
-  int to_client  = 0;
-  return to_client;
-}
-
-
