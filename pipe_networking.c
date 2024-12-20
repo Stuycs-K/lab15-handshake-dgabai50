@@ -29,17 +29,32 @@ int server_handshake(int *to_client) {
   int from_client = server_setup();
 
   char clientPipe[100];
-  read(from_client, clientPipe, sizeof(clientPipe));
+  if (read(from_client, clientPipe, sizeof(clientPipe)) == -1) {
+    printf("SYN READ FAIL\n");
+    exit(1);
+  } else {
+    printf("[SYN READ]: %s\n", clientPipe);
+  }
 
   remove("wkp");
 
   *to_client = open(clientPipe, O_WRONLY);
 
   int syn_ack = 1123;
-  write(*to_client, syn_ack, sizeof(syn_ack));
+  if (write(*to_client, syn_ack, sizeof(syn_ack)) == -1) {
+    printf("SYN_ACK SEND FAIL\n");
+    exit(1);
+  } else {
+    printf("[SYN_ACK SENT]: %d\n", syn_ack);
+  }
 
   int ack;
-  read(from_client, &ack, sizeof(ack));
+  if (read(from_client, &ack, sizeof(ack)) == -1) {
+    printf("ACK READ FAIL\n");
+    exit(1);
+  } else {
+    printf("[ACK READ]: %d\n", ack);
+  }
 
   if (ack != syn_ack + 1) {
     printf("INVALID ACK\n");
