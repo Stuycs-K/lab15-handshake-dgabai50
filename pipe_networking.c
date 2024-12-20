@@ -26,13 +26,26 @@ int server_setup() {
   returns the file descriptor for the upstream pipe (see server setup).
   =========================*/
 int server_handshake(int *to_client) {
-  int from_client;
-  char buffer[100];
-  read(*to_client, buffer, sizeof(buffer));
-  from_client = open(buffer, O_WRONLY);
-  int *rec;
-  *rec = 4;
-  write(from_client, rec, sizeof(rec));
+  int from_client = server_setup();
+
+  char clientPipe[100];
+  read(from_client, clientPipe, sizeof(clientPipe));
+
+  remove("wkp");
+
+  *to_client = open(clientPipe, O_WRONLY);
+
+  int synack = 1123;
+  write(*to_client, synack, sizeof(synack));
+
+  int ack;
+  read(from_client, &ack, sizeof(ack));
+
+  if (ack != synack + 1) {
+    printf("INVALID ACK\n");
+    exit(1);
+  }
+
   return from_client;
 }
 
