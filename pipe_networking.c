@@ -35,13 +35,13 @@ int server_handshake(int *to_client) {
 
   *to_client = open(clientPipe, O_WRONLY);
 
-  int synack = 1123;
-  write(*to_client, synack, sizeof(synack));
+  int syn_ack = 1123;
+  write(*to_client, syn_ack, sizeof(syn_ack));
 
   int ack;
   read(from_client, &ack, sizeof(ack));
 
-  if (ack != synack + 1) {
+  if (ack != syn_ack + 1) {
     printf("INVALID ACK\n");
     exit(1);
   }
@@ -61,6 +61,22 @@ int server_handshake(int *to_client) {
   =========================*/
 int client_handshake(int *to_server) {
   int from_server;
+  
+  char pidPipe[100];
+  int pid = getpid();
+  sprintf(pidPipe, "%d",pid);
+  mkfifo(pidPipe, 0666);
+
+  from_server = open("wkp", O_WRONLY);
+  write(from_server, pid, sizeof(pid));
+
+  int ack;
+  *to_server = open(pidPipe, O_RDONLY);
+  read(*to_server, ack, sizeof(ack));
+
+  int syn_ack = ack + 1;
+  write(from_server, syn_ack, sizeof(syn_ack));
+
   return from_server;
 }
 
