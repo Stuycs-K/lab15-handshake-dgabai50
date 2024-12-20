@@ -68,14 +68,30 @@ int client_handshake(int *to_server) {
   mkfifo(pidPipe, 0666);
 
   from_server = open("wkp", O_WRONLY);
-  write(from_server, pid, sizeof(pid));
+  if (write(from_server, pid, sizeof(pid)) == -1) {
+    printf("SYN SEND FAIL\n");
+    exit(1);
+  } else {
+    printf("[SYN SENT]: %d\n", pid);
+  }
 
-  int ack;
+  int syn_ack;
   *to_server = open(pidPipe, O_RDONLY);
-  read(*to_server, ack, sizeof(ack));
+  if (read(*to_server, syn_ack, sizeof(syn_ack)) == -1) {
+    printf("SYN_ACK READ FAIL\n");
+    exit(1);
+  } else {
+    printf("[SYN_ACK READ]: %d\n", syn_ack);
+  }
 
-  int syn_ack = ack + 1;
-  write(from_server, syn_ack, sizeof(syn_ack));
+
+  int ack = syn_ack + 1;
+  if (write(from_server, ack, sizeof(ack)) == -1) {
+    printf("ACK SEND FAIL\n");
+    exit(1);
+  } else {
+    printf("[ACK SENT]: %d", ack);
+  }
 
   return from_server;
 }
