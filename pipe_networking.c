@@ -20,8 +20,8 @@
   =========================*/
 int server_setup() {
   int from_client = 0;
-  mkfifo("wkp", 0666);
-  from_client = open("wkp", O_RDONLY);
+  mkfifo(WKP, 0666);
+  from_client = open(WKP, O_RDONLY);
   return from_client;
 }
 
@@ -45,11 +45,15 @@ int server_handshake(int *to_client) {
     printf("[SYN READ]: %s\n", clientPipe);
   }
 
-  remove("wkp");
+  remove(WKP);
 
   *to_client = open(clientPipe, O_WRONLY);
 
-  int syn_ack = 1123;
+  int syn_ack;
+  int rfile = open("/dev/urandom", O_RDONLY, 0);
+  read(rfile, &syn_ack, 2);
+  if (syn_ack < 0) syn_ack *= -1;
+  
   if (write(*to_client, &syn_ack, sizeof(syn_ack)) == -1) {
     printf("SYN_ACK SEND FAIL\n");
     exit(1);
@@ -90,7 +94,7 @@ int client_handshake(int *to_server) {
   sprintf(pidPipe, "%d", pid);
   mkfifo(pidPipe, 0666);
 
-  from_server = open("wkp", O_WRONLY);
+  from_server = open(WKP, O_WRONLY);
   if (write(from_server, pidPipe, sizeof(pidPipe)) == -1) {
     printf("SYN SEND FAIL\n");
     exit(1);
