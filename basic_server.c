@@ -12,7 +12,7 @@ int main() {
   read(from_client, &rec, sizeof(rec));
   printf("Recieved: %d\n", rec);
 
-  int out = 10;//rec * 2;
-  write(from_client, &rec, sizeof(out));
-  printf("Sent: %d\n", rec);  
+  int out = 10;
+  write(to_client, &out, sizeof(out));
+  printf("Sent: %d\n", out);  
 }

@@ -110,7 +110,7 @@ int client_handshake(int *to_server) {
     exit(1);
   } else {
     printf("[SYN_ACK READ]: %d\n", syn_ack);
-    remove(pidPipe);
+    remove(pidPipe);  
   }
 
   int ack = syn_ack + 1;
