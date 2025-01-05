@@ -7,13 +7,9 @@ int main() {
 
   from_server = client_handshake( &to_server );
 
-  //sleep(3);
-
-  int out = 15;
-  write(to_server, &out, sizeof(out));
-  printf("Sent: %d\n", out);
-
-  int rec;
-  read(from_server, &rec, sizeof(rec));
-  printf("Recieved: %d\n", rec);
+  int in;
+  while (1) {
+    read(from_server, &in, sizeof(in));
+    printf("RECIEVED:  %d\n", in);
+  }
 }

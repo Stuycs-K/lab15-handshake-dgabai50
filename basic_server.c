@@ -8,11 +8,13 @@ int main() {
 
   printf("Waiting for client...\n");
   
-  int rec;
-  read(from_client, & rec, sizeof(rec));
-  printf("Recieved: %d\n", rec);
-
-  int out = 10;
-  write(to_client, &out, sizeof(out));
-  printf("Sent: %d\n", out);  
+  int rfile = open("/dev/urandom", O_RDONLY, 0);
+  int out;
+  while (1) {
+    read(rfile, &out, 2);
+    if (out < 0) out *= -1;
+    write(to_client, &out, sizeof(out));
+    printf("SENT: %d\n", out);
+    sleep(1);
+  }
 }
