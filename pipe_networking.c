@@ -22,6 +22,7 @@ int server_setup() {
   int from_client = 0;
   mkfifo(WKP, 0666);
   from_client = open(WKP, O_RDONLY);
+  remove(WKP);
   return from_client;
 }
 
@@ -44,8 +45,6 @@ int server_handshake(int *to_client) {
   } else {
     printf("[SYN READ]: %s\n", clientPipe);
   }
-
-  remove(WKP);
 
   *to_client = open(clientPipe, O_WRONLY);
 
