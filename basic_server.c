@@ -9,7 +9,7 @@ int main() {
   printf("Waiting for client...\n");
   
   int rec;
-  read(from_client, &rec, sizeof(rec));
+  read(from_client, & rec, sizeof(rec));
   printf("Recieved: %d\n", rec);
 
   int out = 10;
