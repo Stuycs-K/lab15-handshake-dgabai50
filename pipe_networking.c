@@ -121,6 +121,6 @@ int client_handshake(int *to_server) {
     printf("[ACK SENT]: %d\n", ack);
   }
 
-  
+  remove(pidPipe);
   return from_server;
 }
