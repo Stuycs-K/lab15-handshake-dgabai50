@@ -7,9 +7,11 @@ int main() {
 
   from_server = client_handshake( &to_server );
 
-  int in;
+  char out[100];
+  sprintf(out, "Message from client %d", getpid());
   while (1) {
-    read(from_server, &in, sizeof(in));
-    printf("RECIEVED:  %d\n", in);
+    write(to_server, &out, sizeof(out));
+    printf("SENT: %s\n", out);
+    sleep(1);
   }
 }
